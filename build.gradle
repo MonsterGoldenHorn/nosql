@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.4.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'idea'
+}
+
+group 'com.tango.nosql'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 15
+
+repositories {
+    maven{
+        url "https://maven.aliyun.com/nexus/content/repositories/central/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.springframework.boot:spring-boot'
+}
