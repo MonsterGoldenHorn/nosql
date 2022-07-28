@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://192.168.56.102:27017/earth
+      uri: mongodb://192.168.56.102:27017/test
 
   elasticsearch:
     rest:
