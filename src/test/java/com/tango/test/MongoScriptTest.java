@@ -25,11 +25,73 @@ public class MongoScriptTest {
     @Test
     void test(){
         Document document = mongoTemplate.executeCommand("""
-                 {"find":"dbz",
+                 {find:"dbz",
+                   filter:{"age":28}
+                 }
+                """);
+        System.out.println(document);
+    }
+
+    @Test
+    void update(){
+        Document document = mongoTemplate.executeCommand("""
+                 {"update":"dbz",
                    "filter":{"age":28}
                  }
                 """);
         System.out.println(document);
     }
 
+    @Test
+    void exec(){
+        Document document = mongoTemplate.executeCommand("""
+                {
+                        "aggregate": "orders",
+                           "pipeline":[
+                            {
+                                $lookup:\s
+                                {
+                                    from: "inventory",
+                                    localField: "item",
+                                    foreignField: "sku",
+                                    as: "inventory_docs"
+                                }
+                            },
+                            {
+                                $project:\s
+                                {
+                                    _id: 0,
+                                    item: 1,
+                                    price: 1,
+                                    'inventory_docs.instock': 1
+                                }
+                            },
+                            {
+                                $addFields: {
+                                    "inventory_docs.item": "$item",
+                                    "inventory_docs.price": "$price",
+                                   \s
+                                }
+                            },
+                            {
+                                $unwind: "$inventory_docs"
+                            },
+                            {
+                                $replaceRoot: {
+                                    newRoot: "$inventory_docs"
+                                }
+                            },
+                            {
+                                $match: {
+                                    "instock": {
+                                        $exists: true
+                                    }
+                                }
+                            }
+                        ],
+                           cursor: {}
+                        }
+                """);
+        System.out.println(document);
+    }
 }

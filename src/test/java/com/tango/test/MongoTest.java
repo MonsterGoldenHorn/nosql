@@ -2,18 +2,25 @@ package com.tango.test;
 
 import com.mongodb.MongoException;
 import com.tango.nosql.config.Boot;
+import org.bson.BsonNull;
 import org.bson.Document;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.mongodb.core.DocumentCallbackHandler;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @description
@@ -23,6 +30,80 @@ import javax.annotation.Resource;
 public class MongoTest {
     @Resource
     MongoTemplate mongoTemplate;
+
+    /**
+     * 统计
+     */
+    @Test
+    void count(){
+        /**
+         * [{
+         *     $match: {
+         *         home_id: {
+         *             $gt: '581447'
+         *         }
+         *     }
+         * }, {
+         *     $count: 'home_id'
+         * }]
+         */
+        MatchOperation match = new MatchOperation(Criteria.where("home_id").gt("581447"));
+        CountOperation count = new CountOperation("home_id");
+        Aggregation aggregation = Aggregation.newAggregation(Arrays.asList(match, count));
+        AggregationResults<Map> dbz = mongoTemplate.aggregate(aggregation, "patient", Map.class);
+        System.out.println(dbz.getMappedResults());
+    }
+
+    /**
+     * sum
+     *  https://www.freesion.com/article/54071366090/
+     *
+     *  [{
+     *     $group: {
+     *         _id: null,
+     *         total: {
+     *             $sum: {
+     *                 $toDouble: '$hos_total_fee'
+     *             }
+     *         }
+     *     }
+     * }]
+     *
+     */
+    @Test
+    void sum(){
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("home_id").gt("581447")),
+                Aggregation.group().sum("hos_total_fee").as("s")//字符串统计出来都是0
+//                ,new ProjectionOperation().andInclude("hos_total_fee").and("hos_total_fee")
+        );
+        AggregationResults<Map> dbz = mongoTemplate.aggregate(aggregation, "patient", Map.class);
+//        List<Document> documents = Arrays.asList(new Document("$group",
+//                new Document("_id",
+//                        new BsonNull())
+//                        .append("total",
+//                                new Document("$sum",
+//                                        new Document("$toDouble", "$hos_total_fee")))));
+        System.out.println(dbz.getMappedResults());
+    }
+
+
+    /**
+     * 关联查询
+     */
+    @Test
+    void join(){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("name").is("tang"));
+        LookupOperation lookup = LookupOperation.newLookup()
+                .from("tag")
+                .localField("_id")
+                .foreignField("_id")
+                .as("id");
+        Aggregation aggregation = Aggregation.newAggregation(lookup);
+        AggregationResults<Map> dbz = mongoTemplate.aggregate(aggregation, "dbz", Map.class);
+        System.out.println(dbz.getMappedResults());
+    }
 
     /**
      * 字段查询
