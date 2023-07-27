@@ -1,6 +1,7 @@
 package com.tango.test;
 
 import com.tango.nosql.config.Boot;
+import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -19,13 +20,22 @@ public class MongoTransactionTest {
     MongoTemplate mongoTemplate;
 
     @Test
-    @Transactional(value = "mongoTransactionManager", rollbackFor = Exception.class)
+//    @Transactional(value = "mongoTransactionManager", rollbackFor = Exception.class)
     void test() throws Exception {
-        mongoTemplate.executeCommand("""
-                 {  "insert":"dd",
-                   "documents": [ { "_id": 1, "user": "abc123", "status": "A" } ]
+        Document document = mongoTemplate.executeCommand("""
+                 { "insert":"dd",
+                   "documents": [ { "_id": 1, "user": "abc1234", "status": "A" } ]
                  }
                 """);
+        System.out.println(document);
+//        throw new Exception("xx");
+    }
+
+    @Test
+//    @Transactional(value = "mongoTransactionManager", rollbackFor = Exception.class)
+    void test1() throws Exception {
+//        String dd = mongoTemplate.insert(""{ "_id": 2, "user": "abc123", "status": "A" }"", "dd");
+//        System.out.println(dd);
 //        throw new Exception("xx");
     }
 

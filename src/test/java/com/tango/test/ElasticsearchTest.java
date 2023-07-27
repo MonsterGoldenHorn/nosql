@@ -18,6 +18,7 @@ public class ElasticsearchTest {
     @Resource
     ElasticsearchRestTemplate elasticsearchRestTemplate;
     @Test
-    void test(){}
+    void test(){
+    }
 
 }

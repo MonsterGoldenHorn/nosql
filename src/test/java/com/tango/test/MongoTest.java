@@ -32,6 +32,14 @@ public class MongoTest {
     MongoTemplate mongoTemplate;
 
     /**
+     * 监听
+     */
+    @Test
+    void monitor(){
+
+    }
+
+    /**
      * 统计
      */
     @Test
